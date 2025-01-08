@@ -37,6 +37,10 @@ function __wcd_find_repos
             continue # Skip adding subdirectories if a repo is found
         end
 
+        if test -f "$current_dir/.wcdignore"
+            continue # Skip adding subdirectories if an ignore-file is found
+        end
+
         # Check if the current directory contains the target repo
         if test -d "$current_dir/$repo_name/.git"
             set repos $repos $current_dir/$repo_name

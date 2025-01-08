@@ -15,6 +15,10 @@ function __wcd_find_any_repos
             continue # Skip adding subdirectories if a repo is found
         end
 
+        if test -f "$current_dir/.wcdignore"
+            continue # Skip adding subdirectories if an ignore-file is found
+        end
+
         # Enqueue all immediate subdirectories
         for sub_dir in $current_dir/*
             if test -d $sub_dir

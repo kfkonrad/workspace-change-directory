@@ -38,6 +38,10 @@ __wcd_find_repos() {
             continue  # Skip adding subdirectories if a repo is found
         fi
 
+        if [[ -f "$current_dir/.wcdignore" ]]; then
+            continue  # Skip adding subdirectories if an ignore-file is found
+        fi
+
         # Check if the current directory contains the target repo
         if [[ -d "$current_dir/$repo_name/.git" ]]; then
             repos+=("$current_dir/$repo_name")
@@ -91,6 +95,10 @@ __wcd_find_any_repos() {
         if [[ -d "$current_dir/.git" ]]; then
             repos+=("$current_dir")
             continue # Skip adding subdirectories if a repo is found
+        fi
+
+        if [[ -f "$current_dir/.wcdignore" ]]; then
+            continue  # Skip adding subdirectories if an ignore-file is found
         fi
 
         # Enqueue all immediate subdirectories

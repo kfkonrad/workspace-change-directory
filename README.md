@@ -90,6 +90,10 @@ wcd <repo-name>
 
 `wcd` only finds repos if the name fully matches `wcd`'s argument, i.e. passing partial names will not find a match.
 
+`wcd` also supports ignoring directories. To do so create an empty file called `.wcdignore` in
+the directory you wish to ignore. This directory and any subdirectories won't be listed in completions and can't be
+`cd`d into with `wcd`.
+
 ### Examples
 
 1. Assume the directory `~/workspace/foo/bar/baz` exists and is a git repo. Running `wcd baz` will `cd` into
@@ -107,6 +111,14 @@ wcd <repo-name>
    By typing in the number of your desired repo and pressing enter `wcd` with `cd` there.
 1. Assume that no repo called `foo` exists in `~/workspace` or you have `WCD_BASE_DIR` set to a non-existent directory
   or `~/workspace` doesn't exist. Running `wcd foo` will print the following error message:
+
+   ```txt
+   Repository not found.
+   ```
+
+1. Assume the directory `~/workspace/foo/bar/` exists and is a git repo. Assume further than either a file
+   `~/workspace/.wcdignore` or `~/workspace/foo/.wcdignore` or `~/workspace/foo/bar/.wcdignore` (or any combination of
+   them) exists. Running `wcd bar` will print the following error message:
 
    ```txt
    Repository not found.
