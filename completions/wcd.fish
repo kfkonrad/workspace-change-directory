@@ -9,14 +9,14 @@ function __wcd_find_any_repos
         set -l current_dir $queue[1]
         set queue $queue[2..-1] # Dequeue
 
+        if test -f "$current_dir/.wcdignore"
+            continue # Skip adding subdirectories if an ignore-file is found
+        end
+
         # Check if the current directory contains the target repo
         if test -d "$current_dir/.git"
             set repos $repos $current_dir
             continue # Skip adding subdirectories if a repo is found
-        end
-
-        if test -f "$current_dir/.wcdignore"
-            continue # Skip adding subdirectories if an ignore-file is found
         end
 
         # Enqueue all immediate subdirectories

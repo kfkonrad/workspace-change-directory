@@ -37,7 +37,7 @@ function __wcd_find_repos
             continue # Skip adding subdirectories if a repo is found
         end
 
-        if test -f "$current_dir/.wcdignore"
+        if test -f "$current_dir/.wcdignore" -o -f "$current_dir/$repo_name/.wcdignore"
             continue # Skip adding subdirectories if an ignore-file is found
         end
 

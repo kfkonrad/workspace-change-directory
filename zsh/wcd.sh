@@ -38,7 +38,7 @@ __wcd_find_repos() {
             continue  # Skip adding subdirectories if a repo is found
         fi
 
-        if [[ -f "$current_dir/.wcdignore" ]]; then
+        if [[ -f "$current_dir/.wcdignore" ]] || [[ -f "$current_dir/$repo_name/.wcdignore" ]]; then
             continue  # Skip adding subdirectories if an ignore-file is found
         fi
 
@@ -48,14 +48,12 @@ __wcd_find_repos() {
         fi
 
         # Enqueue all immediate subdirectories
-        # Use a nullglob to avoid errors when no matches are found
-        setopt localoptions nullglob
-        for sub_dir in "$current_dir"/*; do
+        # Use a nullglob *(N) to avoid errors when no matches are found
+        for sub_dir in "$current_dir"/*(N); do
             if [[ -d "$sub_dir" ]]; then
                 queue+=("$sub_dir")
             fi
         done
-        unsetopt nullglob
     done
 
     # Output all found repos
@@ -98,18 +96,19 @@ __wcd_find_any_repos() {
         local current_dir="${queue[1]}"
         queue=("${queue[@]:1}") # Dequeue
 
+        if [[ -f "$current_dir/.wcdignore" ]]; then
+            continue  # Skip adding subdirectories if an ignore-file is found
+        fi
+
         # Check if the current directory contains the target repo
         if [[ -d "$current_dir/.git" ]]; then
             repos+=("$current_dir")
             continue # Skip adding subdirectories if a repo is found
         fi
 
-        if [[ -f "$current_dir/.wcdignore" ]]; then
-            continue  # Skip adding subdirectories if an ignore-file is found
-        fi
-
         # Enqueue all immediate subdirectories
-        for sub_dir in "$current_dir"/*; do
+        # Use a nullglob *(N) to avoid errors when no matches are found
+        for sub_dir in "$current_dir"/*(N); do
             if [[ -d "$sub_dir" ]]; then
                 queue+=("$sub_dir")
             fi
