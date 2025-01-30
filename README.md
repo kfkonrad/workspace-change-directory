@@ -2,7 +2,7 @@
 
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
-Change the directory to a given repo in your workspace in Fish, Bash and ZSH
+Change the directory to a given repo in your workspace in Fish, Bash, ZSH and Nushell.
 
 The `wcd` command searches for a git repo within a configured folder (default: `~/workspace`) and `cd`s into
 that repo if it is found. If multiple repos are found, the user is asked to pick one interactively.
@@ -17,8 +17,8 @@ that repo if it is found. If multiple repos are found, the user is asked to pick
 
 ## Install
 
-There are three implementations of `wcd` with an identical feature set for Fish, Bash and ZSH. All implementations come
-_with_ completions.
+There are four implementations of `wcd` with an identical feature set for Fish, Bash, ZSH and Nushell. All
+implementations come _with_ completions.
 
 ### Fish
 
@@ -78,6 +78,28 @@ Install with `wget`:
 mkdir -p ~/.config/
 wget https://raw.githubusercontent.com/kfkonrad/workspace-change-directory/main/zsh/wcd.sh -qO ~/.config/wcd.sh
 echo 'source ~/.config/wcd.sh' >> ~/.zshrc
+```
+
+### Nushell
+
+To install `wcd` you can download
+[nushell/wcd.sh](https://github.com/kfkonrad/klone/blob/main/nushell/wcd.sh) and source it in your `config.nu`.
+Below are examples for installing the script using `curl` and `wget` for added convenience:
+
+Install with `curl`:
+
+```sh
+mkdir ~/.config/wcd
+curl https://raw.githubusercontent.com/kfkonrad/workspace-change-directory/main/nushell/wcd.nu -so ~/.config/wcd/wcd.nu
+"\nsource ~/.config/wcd/wcd.nu\n" o>> $nu.config-path
+```
+
+Install with `wget`:
+
+```sh
+mkdir ~/.config/wcd
+wget https://raw.githubusercontent.com/kfkonrad/workspace-change-directory/main/nushell/wcd.nu -qO ~/.config/wcd/wcd.nu
+"\nsource ~/.config/wcd/wcd.nu\n" o>> $nu.config-path
 ```
 
 ## Usage
