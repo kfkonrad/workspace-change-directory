@@ -36,7 +36,7 @@ def __wcd_find_any_repos [] {
       $queue = ($queue | skip 1) # Dequeue
 
       if ($current_dir | path join ".git" | path exists) {
-          $repos = ($repos | append ($current_dir | split row "/" | last))
+          $repos = ($repos | append ($current_dir | path split | last))
           continue # Skip adding subdirectories if a repo is found
       }
 
