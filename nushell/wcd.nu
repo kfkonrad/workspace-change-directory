@@ -25,7 +25,7 @@ def --env wcd [repo_name: string@repositories] {
 }
 
 def __wcd_find_any_repos [] {
-  let base_dir = if ($env.WCD_BASE_DIR? != null) { $env.WCD_BASE_DIR } else { $"($nu.home-path)/workspace" }
+  let base_dir = $env.WCD_BASE_DIR? | default $"($nu.home-path)/workspace"
 
   mut queue = [$base_dir]
   mut repos = []
@@ -54,7 +54,7 @@ def __wcd_find_any_repos [] {
 }
 
 def __wcd_find_repos [repo_name: string] {
-    let base_dir = if ($env.WCD_BASE_DIR? != null) { $env.WCD_BASE_DIR } else { $"($nu.home-path)/workspace" }
+    let base_dir = $env.WCD_BASE_DIR? | default $"($nu.home-path)/workspace"
 
     mut queue = [$base_dir]
     mut repos = []
