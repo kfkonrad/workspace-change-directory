@@ -12,6 +12,7 @@ CONTAINERS=("wcd-bash" "wcd-zsh" "wcd-fish" "wcd-nu")
 # Global variables for cleanup
 VENV_DIR=""
 FAKE_WORKSPACE_DIR=""
+FAKE_WORKSPACE_DIR2=""
 
 cleanup() {
     echo "Cleaning up containers..."
@@ -33,6 +34,11 @@ cleanup() {
         rm -rf "$FAKE_WORKSPACE_DIR"
         echo "Removed fake workspace: $FAKE_WORKSPACE_DIR"
     fi
+
+    if [[ -n "$FAKE_WORKSPACE_DIR2" && -d "$FAKE_WORKSPACE_DIR2" ]]; then
+        rm -rf "$FAKE_WORKSPACE_DIR2"
+        echo "Removed fake workspace: $FAKE_WORKSPACE_DIR2"
+    fi
 }
 
 trap cleanup EXIT
@@ -47,18 +53,24 @@ echo "Created and activated venv: $VENV_DIR"
 # Create fake workspace with multiple repositories for wcd testing
 echo "Creating fake workspace structure..."
 FAKE_WORKSPACE_DIR=$(mktemp -d -t wcd-test-workspace-XXXXXX)
+FAKE_WORKSPACE_DIR2=$(mktemp -d -t wcd-test-workspace-XXXXXX)
 
 # Create some fake repositories with just .git folders
-mkdir -p "$FAKE_WORKSPACE_DIR"/{project1,project2,nested/project3,company/app1,company/app2}/.git
+mkdir -p "$FAKE_WORKSPACE_DIR"/{foo,bar,baz,company/baz,company/qux,company/foobar,foobar/quux}/.git
+mkdir -p "$FAKE_WORKSPACE_DIR2"/{qux,corge,my-project/grault,garply/waldo,garply/fred/plugh,xyzzy}/.git
+touch "$FAKE_WORKSPACE_DIR2"/{garply,xyzzy}/.wcdignore
 
 echo "Created fake workspace at: $FAKE_WORKSPACE_DIR"
-echo "Fake repositories: project1, project2, nested/project3, company/app1, company/app2"
+echo "Fake repositories: foo, bar, baz, company/baz, company/qux, company/foobar, foobar/quux"
+echo "Created fake secondary workspace at: $FAKE_WORKSPACE_DIR2"
+echo "Fake repositories: quux, corge, my-project/grault, garply/waldo, garply/fred/plugh, xyzzy"
 
 # Bash Container
 docker run -d --name "wcd-bash" \
   -v "$(pwd)/..:/wcd-repo" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
-  -e WCD_BASE_DIR=/workspace \
+  -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
+  -e WCD_BASE_DIR=/workspace:/other-workspace \
   -w /workspace \
   "bash:${BASH_VERSION}" sleep infinity
 
@@ -66,7 +78,8 @@ docker run -d --name "wcd-bash" \
 docker run -d --name "wcd-zsh" \
   -v "$(pwd)/..:/wcd-repo" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
-  -e WCD_BASE_DIR=/workspace \
+  -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
+  -e WCD_BASE_DIR=/workspace:/other-workspace \
   -w /workspace \
   "zshusers/zsh:${ZSH_VERSION}" sleep infinity
 
@@ -74,7 +87,8 @@ docker run -d --name "wcd-zsh" \
 docker run -d --name "wcd-fish" \
   -v "$(pwd)/..:/wcd-repo" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
-  -e WCD_BASE_DIR=/workspace \
+  -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
+  -e WCD_BASE_DIR=/workspace:/other-workspace \
   -w /workspace \
   "ohmyfish/fish:${FISH_VERSION}" sleep infinity
 
@@ -82,7 +96,8 @@ docker run -d --name "wcd-fish" \
 docker run -d --name "wcd-nu" \
   -v "$(pwd)/..:/wcd-repo" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
-  -e WCD_BASE_DIR=/workspace \
+  -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
+  -e WCD_BASE_DIR=/workspace:/other-workspace \
   -w /workspace \
   --entrypoint /bin/sh \
   "hustcer/nushell:${NU_VERSION}" -c 'sleep infinity'

@@ -15,8 +15,50 @@ CLI_FILES = {
     "nu": "/wcd-repo/nushell/wcd.nu"
 }
 
+LIST_OF_ALL_REPOS = [
+    "bar",
+    "baz",
+    "corge",
+    "foo",
+    "foobar",
+    "grault",
+    "quux",
+    "qux",
+]
+
 TEST_CASES = [
-    ("wcd project1", "/workspace/project1", 0),
+    # basic navigation to existing repos
+    ("wcd foo", "/workspace/foo", 0),
+    ("wcd bar", "/workspace/bar", 0),
+    # repo names may not be duplicate but the directory name may appear in different paths
+    ("wcd quux", "/workspace/foobar/quux", 0),
+    ("wcd foobar", "/workspace/company/foobar", 0),
+    # navigation to repos in secondary BASE_DIR
+    ("wcd corge", "/other-workspace/corge", 0),
+    ("wcd grault", "/other-workspace/my-project/grault", 0),
+
+    # test non-existent repository
+    ("wcd nonexistent", "Repository not found", 1),
+    # wcd should act case sensitive
+    ("wcd FOO", "Repository not found", 1),
+    # fuzzy finding is not supported
+    ("wcd grau", "Repository not found", 1),
+    # repos should be ignored if they have a .wcdignore
+    ("wcd xyzzy", "Repository not found", 1),
+    # repos should be ignored if there is a .wcdignore in any of their parent directories
+    ("wcd waldo", "Repository not found", 1),
+    ("wcd plugh", "Repository not found", 1),
+
+    # test empty argument
+    ("wcd", "Please provide a repository name", 1),
+
+    # test multiple repos found case within one BASE_DIR
+    ("wcd baz", "Multiple repositories found. Please select one:", 1),
+    # test multiple repos found case across BASE_DIRs
+    ("wcd qux", "Multiple repositories found. Please select one:", 1),
+
+    # test whether completion lists all repos
+    ("__wcd_find_any_repos", LIST_OF_ALL_REPOS, 0)
 ]
 
 def run_in_shell(shell, command):
@@ -31,6 +73,7 @@ def run_in_shell(shell, command):
         ]
     elif shell == "fish":
         source_commands = " && ".join([f"source {cli_file}" for cli_file in cli_files])
+        print()
         docker_cmd = [
             "docker", "exec", container_name,
             "fish", "-c", f"{source_commands} && {command} && pwd"
@@ -38,7 +81,7 @@ def run_in_shell(shell, command):
     elif shell == "nu":
         docker_cmd = [
             "docker", "exec", container_name,
-            "nu", "-c", f"source {cli_files}; {command}; pwd"
+            "nu", "-c", f"source {cli_files}; print ({command}); pwd"
         ]
     else:
         raise ValueError(f"Unknown shell: {shell}")
@@ -56,7 +99,7 @@ def test_wcd(shell, command, expected_output, expected_code):
 
     exit_code, stdout, stderr = run_in_shell(shell, command)
 
-    if exit_code != expected_code or expected_output not in stdout:
+    if exit_code != expected_code or (type(expected_output) == list and any(elem not in stdout for elem in expected_output)) or (type(expected_output) == str and expected_output not in stdout):
         print(f"\n--- Debug Info for {shell} ---")
         print(f"Command: {command}")
         print(f"Expected exit code: {expected_code}, got: {exit_code}")
@@ -66,8 +109,29 @@ def test_wcd(shell, command, expected_output, expected_code):
         print("--- End Debug ---")
 
     # Assertions
-    assert exit_code == expected_code, f"Expected exit code {expected_code}, got {exit_code}"
-    assert expected_output in stdout, f"Expected '{expected_output}' in stdout: {stdout}"
+
+    # For tests that find multiple repos Bash will run in a timeout. This happens because the commands are tested
+    # non-interactively and is expected for Bash
+    if shell == "bash" and expected_output == "Multiple repositories found. Please select one:":
+        assert exit_code == -1
+        assert stderr == "Command timed out"
+        return
+
+    # Nu does not use exit codes for functions, only for external commands.
+    # This means we need to skip this assertion for Nu
+    if shell != "nu":
+        assert exit_code == expected_code, f"Expected exit code {expected_code}, got {exit_code}"
+
+    # Nu will ouput a built-in error message on a missing parameter, so we have to skip this assertion as well for that
+    # test case
+    if shell == "nu" and command == "wcd":
+        return
+
+    if type(expected_output) == list:
+        for elem in expected_output:
+            assert elem in stdout, f"Expected '{elem}' in stdout: {stdout}"
+    else:
+        assert expected_output in stdout, f"Expected '{expected_output}' in stdout: {stdout}"
 
 def test_container_connectivity():
     """Verify all shell containers are accessible"""
