@@ -11,6 +11,7 @@ that repo if it is found. If multiple repos are found, the user is asked to pick
 
 - [Install](#install)
 - [Usage](#usage)
+- [Testing](#testing)
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
 - [License](#license)
@@ -146,6 +147,27 @@ the directory you wish to ignore. This directory and any subdirectories won't be
    Repository not found.
    ```
 
+## Testing
+
+The test suite validates `wcd` functionality across all supported shells (Bash, ZSH, Fish, Nushell) using Docker
+containers and pytest.
+
+### Requirements
+
+- Bash
+- Docker
+- Python 3
+
+### Running Tests
+
+```sh
+cd tests
+./test.sh
+```
+
+The test script automatically sets up Docker containers for each shell, creates test repositories, installs dependencies
+in a venv, runs the full test suite and cleans up the containers, test repos and venv.
+
 ## Maintainers
 
 [@kfkonrad](https://github.com/kfkonrad)
@@ -159,4 +181,4 @@ Small note: If editing the README, please conform to the
 
 ## License
 
-MIT © 2024 Kevin F. Konrad
+MIT © 2025 Kevin F. Konrad
