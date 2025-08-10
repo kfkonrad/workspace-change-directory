@@ -25,7 +25,7 @@ function __wcd_find_repos
     set base_dir (test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
 
 
-    set -l queue $base_dir
+    set -l queue (string split ':' "$base_dir")
     set -l repos
 
     # Breadth first search, skipping subdirectories of git repos

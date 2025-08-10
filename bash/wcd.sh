@@ -26,7 +26,8 @@ __wcd_find_repos() {
     local base_dir=$(test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
 
     # Initialize a queue with the base directory
-    local queue=("$base_dir")
+    local queue=()
+    IFS=':' read -r -a queue <<< "$base_dir"
     local repos=()
 
     # Breadth-first search, skipping subdirectories of git repos
@@ -83,7 +84,8 @@ __wcd_select_and_cd_repo() {
 
 __wcd_find_any_repos() {
     local base_dir=$(test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
-    local queue=("$base_dir")
+    local queue=()
+    IFS=':' read -r -a queue <<< "$base_dir"
     local repos=()
 
     # Breadth first search, skipping subdirectories of git repos
