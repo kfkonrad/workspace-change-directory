@@ -72,6 +72,7 @@ docker run -d --name "wcd-bash" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
   -e WCD_BASE_DIR=/workspace:/other-workspace \
   -w /workspace \
+  ${DOCKER_USER_ARGS:-} \
   "bash:${BASH_VERSION}" sleep infinity
 
 # ZSH Container
@@ -81,6 +82,7 @@ docker run -d --name "wcd-zsh" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
   -e WCD_BASE_DIR=/workspace:/other-workspace \
   -w /workspace \
+  ${DOCKER_USER_ARGS:-} \
   "zshusers/zsh:${ZSH_VERSION}" sleep infinity
 
 # Fish Container
@@ -90,6 +92,7 @@ docker run -d --name "wcd-fish" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
   -e WCD_BASE_DIR=/workspace:/other-workspace \
   -w /workspace \
+  ${DOCKER_USER_ARGS:-} \
   "ohmyfish/fish:${FISH_VERSION}" sleep infinity
 
 # Nushell Container
@@ -100,6 +103,7 @@ docker run -d --name "wcd-nu" \
   -e WCD_BASE_DIR=/workspace:/other-workspace \
   -w /workspace \
   --entrypoint /bin/sh \
+  ${DOCKER_USER_ARGS:-} \
   "hustcer/nushell:${NU_VERSION}" -c 'sleep infinity'
 
 
