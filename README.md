@@ -21,8 +21,8 @@ that repo if it is found. If multiple repos are found, the user is asked to pick
 There are four implementations of `wcd` with an identical feature set for Fish, Bash, ZSH and Nushell. All
 implementations come _with_ completions.
 
-### Fish
-
+<details>
+  <summary>Install <code>wcd</code> in Fish</summary>
 This repo is an oh my fish and fisher compatible plugin repo.
 
 To install `wcd` with oh my fish run:
@@ -37,8 +37,10 @@ To install `wcd` with fisher run:
 fisher install kfkonrad/workspace-change-directory
 ```
 
-### Bash
+</details>
 
+<details>
+  <summary>Install <code>wcd</code> in Bash</summary>
 To install `wcd` you can download
 [bash/wcd.sh](https://github.com/kfkonrad/workspace-change-directory/blob/main/bash/wcd.sh) and source it in your
 `.bashrc`. Below are examples for installing the script using `curl` and `wget` for added convenience:
@@ -59,7 +61,10 @@ wget https://raw.githubusercontent.com/kfkonrad/workspace-change-directory/main/
 echo 'source ~/.config/wcd.sh' >> ~/.bashrc
 ```
 
-### ZSH
+</details>
+
+<details>
+  <summary>Install <code>wcd</code> in ZSH</summary>
 
 To install `wcd` you can download
 [zsh/wcd.sh](https://github.com/kfkonrad/workspace-change-directory/blob/main/zsh/wcd.sh) and source it in your
@@ -81,7 +86,10 @@ wget https://raw.githubusercontent.com/kfkonrad/workspace-change-directory/main/
 echo 'source ~/.config/wcd.sh' >> ~/.zshrc
 ```
 
-### Nushell
+</details>
+
+<details>
+  <summary>Install <code>wcd</code> in Nushell</summary>
 
 To install `wcd` you can download
 [nushell/wcd.sh](https://github.com/kfkonrad/klone/blob/main/nushell/wcd.sh) and source it in your `config.nu`.
@@ -102,6 +110,8 @@ mkdir ~/.config/wcd
 wget https://raw.githubusercontent.com/kfkonrad/workspace-change-directory/main/nushell/wcd.nu -qO ~/.config/wcd/wcd.nu
 "\nsource ~/.config/wcd/wcd.nu\n" o>> $nu.config-path
 ```
+
+</details>
 
 ## Usage
 
