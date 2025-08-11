@@ -21,6 +21,21 @@ wcd() {
     fi
 }
 
+__wcd_is_repo() {
+    local dir=$1
+    local markers
+    markers=$(test -z "$WCD_REPO_MARKERS" && echo ".git" || echo "$WCD_REPO_MARKERS")
+
+    local marker_list=()
+    IFS=':' read -r -a marker_list <<< "$markers"
+    for marker in "${marker_list[@]}"; do
+        if [[ -f "$dir/$marker" ]] || [[ -d "$dir/$marker" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 __wcd_find_repos() {
     local repo_name=$1
     local base_dir=$(test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
@@ -35,7 +50,7 @@ __wcd_find_repos() {
         local current_dir=${queue[0]}
         queue=("${queue[@]:1}")  # Dequeue
 
-        if [[ -d "$current_dir/.git" ]]; then
+        if __wcd_is_repo "$current_dir"; then
             continue  # Skip adding subdirectories if a repo is found
         fi
 
@@ -43,10 +58,15 @@ __wcd_find_repos() {
             continue  # Skip adding subdirectories if an ignore-file is found
         fi
 
-        # Check if the current directory contains the target repo
-        if [[ -d "$current_dir/$repo_name/.git" ]]; then
-            repos+=("$current_dir/$repo_name")
-        fi
+        # Check if the current directory contains the target repo (case sensitive)
+        for sub_dir in "$current_dir"/*; do
+            if [[ -d "$sub_dir" ]]; then
+                local name=$(basename "$sub_dir")
+                if [[ "$name" == "$repo_name" ]] && __wcd_is_repo "$sub_dir"; then
+                    repos+=("$sub_dir")
+                fi
+            fi
+        done
 
         # Enqueue all immediate subdirectories
         for sub_dir in "$current_dir"/*; do
@@ -98,7 +118,7 @@ __wcd_find_any_repos() {
         fi
 
         # Check if the current directory contains the target repo
-        if [[ -d "$current_dir/.git" ]]; then
+        if __wcd_is_repo "$current_dir"; then
             repos+=("$current_dir")
             continue # Skip adding subdirectories if a repo is found
         fi

@@ -105,13 +105,21 @@ wget https://raw.githubusercontent.com/kfkonrad/workspace-change-directory/main/
 
 ## Usage
 
-You can set the base directory for the search by setting `WCD_BASE_DIR`. If unset it defaults to `~/workspace`. Multiple base directories are supported via the `:` separator, so for example `WCD_BASE_DIR='$HOME/workspace:/mnt/projects'` will result in `wcd` searching for repos in `~/workspace` and `/mnt/projects`.
+You can configure `wcd` with the following environment variables:
+
+- `WCD_BASE_DIR`: Base directories to search. If unset it defaults to `~/workspace`. Multiple base directories are
+  supported via the `:` separator, e.g. `WCD_BASE_DIR='~/workspace:/mnt/projects'`
+- `WCD_REPO_MARKERS`: Colon-separated list of files or directories that mark a repository. Defaults to `.git`. Examples:
+  `.git:.hg:.svn` or `Cargo.toml:package.json:pom.xml`
 
 ```sh
 wcd <repo-name>
 ```
 
 `wcd` only finds repos if the name fully matches `wcd`'s argument, i.e. passing partial names will not find a match.
+
+When `WCD_REPO_MARKERS` is set, a directory is considered a repository if it contains any of the listed marker
+files/directories. This affects both navigation and completions in all supported shells.
 
 `wcd` also supports ignoring directories. To do so create an empty file called `.wcdignore` in
 the directory you wish to ignore. This directory and any subdirectories won't be listed in completions and can't be

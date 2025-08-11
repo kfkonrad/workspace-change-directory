@@ -57,11 +57,12 @@ FAKE_WORKSPACE_DIR2=$(mktemp -d -t wcd-test-workspace-XXXXXX)
 
 # Create some fake repositories with just .git folders
 mkdir -p "$FAKE_WORKSPACE_DIR"/{foo,bar,baz,company/baz,company/qux,company/foobar,foobar/quux}/.git
+mkdir -p "$FAKE_WORKSPACE_DIR"/thud/custom
 mkdir -p "$FAKE_WORKSPACE_DIR2"/{qux,corge,my-project/grault,garply/waldo,garply/fred/plugh,xyzzy}/.git
 touch "$FAKE_WORKSPACE_DIR2"/{garply,xyzzy}/.wcdignore
 
 echo "Created fake workspace at: $FAKE_WORKSPACE_DIR"
-echo "Fake repositories: foo, bar, baz, company/baz, company/qux, company/foobar, foobar/quux"
+echo "Fake repositories: foo, bar, baz, company/baz, company/qux, company/foobar, foobar/quux, thud"
 echo "Created fake secondary workspace at: $FAKE_WORKSPACE_DIR2"
 echo "Fake repositories: quux, corge, my-project/grault, garply/waldo, garply/fred/plugh, xyzzy"
 
@@ -71,6 +72,7 @@ docker run -d --name "wcd-bash" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
   -e WCD_BASE_DIR=/workspace:/other-workspace \
+  -e WCD_REPO_MARKERS=custom:.git \
   -w /workspace \
   ${DOCKER_USER_ARGS:-} \
   "bash:${BASH_VERSION}" sleep infinity
@@ -81,6 +83,7 @@ docker run -d --name "wcd-zsh" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
   -e WCD_BASE_DIR=/workspace:/other-workspace \
+  -e WCD_REPO_MARKERS=custom:.git \
   -w /workspace \
   ${DOCKER_USER_ARGS:-} \
   "zshusers/zsh:${ZSH_VERSION}" sleep infinity
@@ -91,6 +94,7 @@ docker run -d --name "wcd-fish" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
   -e WCD_BASE_DIR=/workspace:/other-workspace \
+  -e WCD_REPO_MARKERS=custom:.git \
   -w /workspace \
   ${DOCKER_USER_ARGS:-} \
   "ohmyfish/fish:${FISH_VERSION}" sleep infinity
@@ -101,6 +105,7 @@ docker run -d --name "wcd-nu" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
   -e WCD_BASE_DIR=/workspace:/other-workspace \
+  -e WCD_REPO_MARKERS=custom:.git \
   -w /workspace \
   --entrypoint /bin/sh \
   ${DOCKER_USER_ARGS:-} \

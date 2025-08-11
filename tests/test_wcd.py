@@ -24,6 +24,7 @@ LIST_OF_ALL_REPOS = [
     "grault",
     "quux",
     "qux",
+    "thud",
 ]
 
 TEST_CASES = [
@@ -58,7 +59,9 @@ TEST_CASES = [
     ("wcd qux", "Multiple repositories found. Please select one:", 1),
 
     # test whether completion lists all repos
-    ("__wcd_find_any_repos", LIST_OF_ALL_REPOS, 0)
+    ("__wcd_find_any_repos", LIST_OF_ALL_REPOS, 0),
+
+    ("wcd thud", "/workspace/thud", 0),
 ]
 
 def run_in_shell(shell, command):

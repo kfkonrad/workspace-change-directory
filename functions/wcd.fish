@@ -20,6 +20,19 @@ function wcd
     end
 end
 
+function __wcd_is_repo
+    set dir $argv[1]
+    set markers (test -z "$WCD_REPO_MARKERS" && echo ".git" || echo $WCD_REPO_MARKERS)
+
+    set marker_list (string split ':' "$markers")
+    for marker in $marker_list
+        if test -e "$dir/$marker"
+            return 0
+        end
+    end
+    return 1
+end
+
 function __wcd_find_repos
     set repo_name $argv[1]
     set base_dir (test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
@@ -33,7 +46,7 @@ function __wcd_find_repos
         set -l current_dir $queue[1]
         set queue $queue[2..-1] # Dequeue
 
-        if test -d "$current_dir/.git"
+        if __wcd_is_repo "$current_dir"
             continue # Skip adding subdirectories if a repo is found
         end
 
@@ -41,9 +54,14 @@ function __wcd_find_repos
             continue # Skip adding subdirectories if an ignore-file is found
         end
 
-        # Check if the current directory contains the target repo
-        if test -d "$current_dir/$repo_name/.git"
-            set repos $repos $current_dir/$repo_name
+        # Check if the current directory contains the target repo (case sensitive)
+        for sub_dir in $current_dir/*
+            if test -d $sub_dir
+                set name (basename "$sub_dir")
+                if test "$name" = "$repo_name"; and __wcd_is_repo "$sub_dir"
+                    set repos $repos $sub_dir
+                end
+            end
         end
 
         # Enqueue all immediate subdirectories
