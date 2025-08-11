@@ -84,6 +84,12 @@ __wcd_find_repos() {
 
 __wcd_select_and_cd_repo() {
     echo "Multiple repositories found. Please select one:"
+
+    # Check if running in non-interactive mode (no TTY)
+    if [[ ! -t 0 ]]; then
+        return 1
+    fi
+
     local i=1
     for repo in "$@"; do
         echo "$i: $repo"

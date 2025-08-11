@@ -113,13 +113,6 @@ def test_wcd(shell, command, expected_output, expected_code):
 
     # Assertions
 
-    # For tests that find multiple repos Bash will run in a timeout. This happens because the commands are tested
-    # non-interactively and is expected for Bash
-    if shell == "bash" and expected_output == "Multiple repositories found. Please select one:":
-        assert exit_code == -1
-        assert stderr == "Command timed out"
-        return
-
     # Nu does not use exit codes for functions, only for external commands.
     # This means we need to skip this assertion for Nu
     if shell != "nu":
