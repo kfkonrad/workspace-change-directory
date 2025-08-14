@@ -24,6 +24,15 @@ def --env wcd [repo_name: string@repositories] {
     }
 }
 
+def __wcd_is_repo [dir: string] {
+    let markers = $env.WCD_REPO_MARKERS? | default ".git"
+    let marker_list = $markers | split row ':'
+
+    $marker_list | any { |marker|
+        $dir | path join $marker | path exists
+    }
+}
+
 def __wcd_find_any_repos [] {
   let base_dir = $env.WCD_BASE_DIR? | default $"($nu.home-path)/workspace"
 
@@ -35,7 +44,7 @@ def __wcd_find_any_repos [] {
       let current_dir = $queue.0
       $queue = ($queue | skip 1) # Dequeue
 
-      if ($current_dir | path join ".git" | path exists) {
+      if (__wcd_is_repo $current_dir) {
           $repos = ($repos | append ($current_dir | path split | last))
           continue # Skip adding subdirectories if a repo is found
       }
@@ -64,7 +73,7 @@ def __wcd_find_repos [repo_name: string] {
         let current_dir = $queue.0
         $queue = ($queue | skip 1) # Dequeue
 
-        if ($current_dir | path join ".git" | path exists) {
+        if (__wcd_is_repo $current_dir) {
             continue # Skip adding subdirectories if a repo is found
         }
 
@@ -73,9 +82,12 @@ def __wcd_find_repos [repo_name: string] {
             continue # Skip adding subdirectories if an ignore-file is found
         }
 
-        # Check if the current directory contains the target repo
-        if ($current_dir | path join $repo_name | path join ".git" | path exists) {
-            $repos = ($repos | append ($current_dir | path join $repo_name))
+        # Check if the current directory contains the target repo (case sensitive)
+        let subdirs = (ls -l $current_dir | where type == dir | get name)
+        for sub_dir in $subdirs {
+            if ($sub_dir | path split | last) == $repo_name and (__wcd_is_repo $sub_dir) {
+                $repos = ($repos | append $sub_dir)
+            }
         }
 
         # Enqueue all immediate subdirectories

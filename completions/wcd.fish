@@ -1,3 +1,16 @@
+function __wcd_is_repo
+    set dir $argv[1]
+    set markers (test -z "$WCD_REPO_MARKERS" && echo ".git" || echo $WCD_REPO_MARKERS)
+
+    set marker_list (string split ':' "$markers")
+    for marker in $marker_list
+        if test -e "$dir/$marker"
+            return 0
+        end
+    end
+    return 1
+end
+
 function __wcd_find_any_repos
     set base_dir (test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
 
@@ -14,7 +27,7 @@ function __wcd_find_any_repos
         end
 
         # Check if the current directory contains the target repo
-        if test -d "$current_dir/.git"
+        if __wcd_is_repo "$current_dir"
             set repos $repos $current_dir
             continue # Skip adding subdirectories if a repo is found
         end
