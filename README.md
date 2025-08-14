@@ -104,7 +104,7 @@ wget https://raw.githubusercontent.com/kfkonrad/workspace-change-directory/main/
 
 ## Usage
 
-You can set the base directory for the search by setting `WCD_BASE_DIR`. If unset it defaults to `~/workspace`.
+You can set the base directory for the search by setting `WCD_BASE_DIR`. If unset it defaults to `~/workspace`. Multiple base directories are supported via the `:` separator, so for example `WCD_BASE_DIR='$HOME/workspace:/mnt/projects'` will result in `wcd` searching for repos in `~/workspace` and `/mnt/projects`.
 
 ```sh
 wcd <repo-name>
