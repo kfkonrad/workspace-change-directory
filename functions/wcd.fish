@@ -1,12 +1,19 @@
 function wcd
     set repo_name $argv[1]
+    set -l ignore yes
+    if test "$repo_name" = "--no-ignore" || test "$repo_name" = "-u"
+      set repo_name $argv[2]
+      set ignore no
+    else if test "$argv[2]" = "--no-ignore" || test "$argv[2]" = "-u"
+      set ignore no
+    end
 
     if test -z "$repo_name"
         echo "Please provide a repository name."
         return 1
     end
 
-    set repos (string split " " --no-empty -- (__wcd_find_repos $repo_name))
+    set repos (string split " " --no-empty -- (__wcd_find_repos $repo_name $ignore))
 
     if set -q repos[1]
         if set -q repos[2]
@@ -35,6 +42,7 @@ end
 
 function __wcd_find_repos
     set repo_name $argv[1]
+    set ignore $argv[2]
     set base_dir (test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
 
 
@@ -51,7 +59,9 @@ function __wcd_find_repos
         end
 
         if test -f "$current_dir/.wcdignore" -o -f "$current_dir/$repo_name/.wcdignore"
-            continue # Skip adding subdirectories if an ignore-file is found
+            if test $ignore = "yes"
+                continue # Skip adding subdirectories if an ignore-file is found
+            end
         end
 
         # Check if the current directory contains the target repo (case sensitive)

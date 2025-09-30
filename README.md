@@ -124,6 +124,8 @@ You can configure `wcd` with the following environment variables:
 
 ```sh
 wcd <repo-name>
+wcd --no-ignore <repo-name>
+wcd -u <repo-name>
 ```
 
 `wcd` only finds repos if the name fully matches `wcd`'s argument, i.e. passing partial names will not find a match.
@@ -134,6 +136,9 @@ files/directories. This affects both navigation and completions in all supported
 `wcd` also supports ignoring directories. To do so create an empty file called `.wcdignore` in
 the directory you wish to ignore. This directory and any subdirectories won't be listed in completions and can't be
 `cd`d into with `wcd`.
+
+Use the `--no-ignore` flag (or its short form `-u`) to bypass `.wcdignore` files and search in all directories,
+including those that would normally be ignored.
 
 ### Examples
 
@@ -164,6 +169,9 @@ the directory you wish to ignore. This directory and any subdirectories won't be
    ```txt
    Repository not found.
    ```
+
+1. Continuing from the previous example, running `wcd --no-ignore bar` or `wcd -u bar` will bypass the `.wcdignore`
+   files and successfully `cd` into `~/workspace/foo/bar/` despite the ignore files being present.
 
 ## Testing
 

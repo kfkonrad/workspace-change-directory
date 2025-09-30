@@ -62,6 +62,20 @@ TEST_CASES = [
     ("__wcd_find_any_repos", LIST_OF_ALL_REPOS, 0),
 
     ("wcd thud", "/workspace/thud", 0),
+
+    # test --no-ignore flag functionality
+    ("wcd --no-ignore xyzzy", "/other-workspace/xyzzy", 0),
+    ("wcd --no-ignore waldo", "/other-workspace/garply/waldo", 0),
+    ("wcd --no-ignore plugh", "/other-workspace/garply/fred/plugh", 0),
+
+    # test -u flag functionality (short form)
+    ("wcd -u xyzzy", "/other-workspace/xyzzy", 0),
+    ("wcd -u waldo", "/other-workspace/garply/waldo", 0),
+    ("wcd -u plugh", "/other-workspace/garply/fred/plugh", 0),
+
+    # test flag with non-existent repo still fails
+    ("wcd --no-ignore nonexistent", "Repository not found", 1),
+    ("wcd -u nonexistent", "Repository not found", 1),
 ]
 
 def run_in_shell(shell, command):

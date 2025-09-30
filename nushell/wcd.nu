@@ -10,8 +10,11 @@ def repositories [] {
   }
 }
 
-def --env wcd [repo_name: string@repositories] {
-    let repos = __wcd_find_repos $repo_name | split row --regex '\s+' | where $it != ""
+def --env wcd [
+    repo_name: string@repositories
+    --no-ignore(-u) # Ignore .wcdignore files
+] {
+    let repos = __wcd_find_repos $repo_name $no_ignore | split row --regex '\s+' | where $it != ""
 
     if ($repos | length) > 0 {
         if ($repos | length) > 1 {
@@ -49,6 +52,8 @@ def __wcd_find_any_repos [] {
           continue # Skip adding subdirectories if a repo is found
       }
 
+      # Note: We can't easily check for --no-ignore flag in completion context,
+      # so we'll always check for .wcdignore in completions for consistency
       if ($current_dir | path join ".wcdignore" | path exists) {
           continue # Skip adding subdirectories if an ignore-file is found
       }
@@ -62,7 +67,7 @@ def __wcd_find_any_repos [] {
   $repos | uniq
 }
 
-def __wcd_find_repos [repo_name: string] {
+def __wcd_find_repos [repo_name: string, ignore_flag: bool = false] {
     let base_dir = $env.WCD_BASE_DIR? | default $"($nu.home-path)/workspace"
 
     mut queue = $base_dir | split row ':'
@@ -77,7 +82,7 @@ def __wcd_find_repos [repo_name: string] {
             continue # Skip adding subdirectories if a repo is found
         }
 
-        if (($current_dir | path join ".wcdignore" | path exists) or
+        if (not $ignore_flag) and (($current_dir | path join ".wcdignore" | path exists) or
             ($current_dir | path join $repo_name | path join ".wcdignore" | path exists)) {
             continue # Skip adding subdirectories if an ignore-file is found
         }

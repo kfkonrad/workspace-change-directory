@@ -12,7 +12,13 @@ function __wcd_is_repo
 end
 
 function __wcd_find_any_repos
+    set cmd (commandline -opc)  # get tokens so far
     set base_dir (test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
+    if contains -- --no-ignore $cmd || contains -- -u $cmd
+      set ignore no
+    else
+      set ignore yes
+    end
 
     set -l queue (string split ':' "$base_dir")
     set -l repos
@@ -23,7 +29,9 @@ function __wcd_find_any_repos
         set queue $queue[2..-1] # Dequeue
 
         if test -f "$current_dir/.wcdignore"
-            continue # Skip adding subdirectories if an ignore-file is found
+            if test "$ignore" = yes
+                continue # Skip adding subdirectories if an ignore-file is found
+            end
         end
 
         # Check if the current directory contains the target repo
@@ -47,4 +55,6 @@ function __wcd_find_any_repos
     end
 end
 
+complete -c wcd -l no-ignore -d "Ignore .wcdignore files"
+complete -c wcd -s u -l no-ignore -d "Ignore .wcdignore files"
 complete -c wcd -f -a '(__wcd_find_any_repos)'

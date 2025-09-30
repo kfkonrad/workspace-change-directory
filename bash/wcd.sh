@@ -1,5 +1,13 @@
 wcd() {
     local repo_name=$1
+    local ignore="yes"
+
+    if [[ "$repo_name" == "--no-ignore" ]] || [[ "$repo_name" == "-u" ]]; then
+        repo_name=$2
+        ignore="no"
+    elif [[ "$2" == "--no-ignore" ]] || [[ "$2" == "-u" ]]; then
+        ignore="no"
+    fi
 
     if [[ -z "$repo_name" ]]; then
         echo "Please provide a repository name."
@@ -7,7 +15,7 @@ wcd() {
     fi
 
     local repos
-    IFS=' ' read -r -a repos <<< "$(__wcd_find_repos "$repo_name")"
+    IFS=' ' read -r -a repos <<< "$(__wcd_find_repos "$repo_name" "$ignore")"
 
     if [[ -n "${repos[0]}" ]]; then
         if [[ -n "${repos[1]}" ]]; then
@@ -38,6 +46,7 @@ __wcd_is_repo() {
 
 __wcd_find_repos() {
     local repo_name=$1
+    local ignore=$2
     local base_dir=$(test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
 
     # Initialize a queue with the base directory
@@ -54,7 +63,7 @@ __wcd_find_repos() {
             continue  # Skip adding subdirectories if a repo is found
         fi
 
-        if [[ -f "$current_dir/.wcdignore" ]] || [[ -f "$current_dir/$repo_name/.wcdignore" ]]; then
+        if [[ "$ignore" == "yes" ]] && ([[ -f "$current_dir/.wcdignore" ]] || [[ -f "$current_dir/$repo_name/.wcdignore" ]]); then
             continue  # Skip adding subdirectories if an ignore-file is found
         fi
 
@@ -109,6 +118,15 @@ __wcd_select_and_cd_repo() {
 }
 
 __wcd_find_any_repos() {
+    local ignore="yes"
+    # Check if --no-ignore or -u is in the command line
+    for arg in "${COMP_WORDS[@]}"; do
+        if [[ "$arg" == "--no-ignore" ]] || [[ "$arg" == "-u" ]]; then
+            ignore="no"
+            break
+        fi
+    done
+
     local base_dir=$(test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
     local queue=()
     IFS=':' read -r -a queue <<< "$base_dir"
@@ -119,7 +137,7 @@ __wcd_find_any_repos() {
         local current_dir=${queue[0]}
         queue=("${queue[@]:1}") # Dequeue
 
-        if [[ -f "$current_dir/.wcdignore" ]]; then
+        if [[ "$ignore" == "yes" ]] && [[ -f "$current_dir/.wcdignore" ]]; then
             continue  # Skip adding subdirectories if an ignore-file is found
         fi
 
@@ -146,6 +164,13 @@ __wcd_find_any_repos() {
 
 _wcd_completion() {
     local cur=${COMP_WORDS[COMP_CWORD]}
+
+    # Complete flags
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($(compgen -W "--no-ignore -u" -- "$cur"))
+        return
+    fi
+
     any_repos=$(__wcd_find_any_repos | sort -u)
     COMPREPLY=($(echo $any_repos | tr " " "\n" | grep "^$cur"))
     if test -z "$COMPREPLY"; then
