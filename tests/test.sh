@@ -13,6 +13,7 @@ CONTAINERS=("wcd-bash" "wcd-zsh" "wcd-fish" "wcd-nu")
 VENV_DIR=""
 FAKE_WORKSPACE_DIR=""
 FAKE_WORKSPACE_DIR2=""
+FAKE_HOME_DIR=""
 
 cleanup() {
     echo "Cleaning up containers..."
@@ -39,6 +40,11 @@ cleanup() {
         rm -rf "$FAKE_WORKSPACE_DIR2"
         echo "Removed fake workspace: $FAKE_WORKSPACE_DIR2"
     fi
+
+    if [[ -n "$FAKE_HOME_DIR" && -d "$FAKE_HOME_DIR" ]]; then
+        rm -rf "$FAKE_HOME_DIR"
+        echo "Removed fake home directory: $FAKE_HOME_DIR"
+    fi
 }
 
 trap cleanup EXIT
@@ -54,6 +60,7 @@ echo "Created and activated venv: $VENV_DIR"
 echo "Creating fake workspace structure..."
 FAKE_WORKSPACE_DIR=$(mktemp -d -t wcd-test-workspace-XXXXXX)
 FAKE_WORKSPACE_DIR2=$(mktemp -d -t wcd-test-workspace-XXXXXX)
+FAKE_HOME_DIR=$(mktemp -d -t wcd-test-home-XXXXXX)
 
 # Create some fake repositories with just .git folders
 mkdir -p "$FAKE_WORKSPACE_DIR"/{foo,bar,baz,company/baz,company/qux,company/foobar,foobar/quux}/.git
@@ -61,18 +68,26 @@ mkdir -p "$FAKE_WORKSPACE_DIR"/thud/custom
 mkdir -p "$FAKE_WORKSPACE_DIR2"/{qux,corge,my-project/grault,garply/waldo,garply/fred/plugh,xyzzy}/.git
 touch "$FAKE_WORKSPACE_DIR2"/{garply,xyzzy}/.wcdignore
 
+# Create fake home directory with workspace containing repos for tilde expansion tests
+mkdir -p "$FAKE_HOME_DIR"/workspace/{alpha,beta}/.git
+mkdir -p "$FAKE_HOME_DIR"/projects/{gamma,delta}/.git
+
 echo "Created fake workspace at: $FAKE_WORKSPACE_DIR"
 echo "Fake repositories: foo, bar, baz, company/baz, company/qux, company/foobar, foobar/quux, thud"
 echo "Created fake secondary workspace at: $FAKE_WORKSPACE_DIR2"
 echo "Fake repositories: quux, corge, my-project/grault, garply/waldo, garply/fred/plugh, xyzzy"
+echo "Created fake home directory at: $FAKE_HOME_DIR"
+echo "Fake home repositories: workspace/{alpha,beta}, projects/{gamma,delta}"
 
 # Bash Container
 docker run -d --name "wcd-bash" \
   -v "$(pwd)/..:/wcd-repo" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
-  -e WCD_BASE_DIR=/workspace:/other-workspace \
+  -v "$FAKE_HOME_DIR:/fake-home" \
+  -e WCD_BASE_DIR='/workspace:/other-workspace:~/workspace:~/projects' \
   -e WCD_REPO_MARKERS=custom:.git \
+  -e HOME=/fake-home \
   -w /workspace \
   ${DOCKER_USER_ARGS:-} \
   "bash:${BASH_VERSION}" sleep infinity
@@ -82,8 +97,10 @@ docker run -d --name "wcd-zsh" \
   -v "$(pwd)/..:/wcd-repo" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
-  -e WCD_BASE_DIR=/workspace:/other-workspace \
+  -v "$FAKE_HOME_DIR:/fake-home" \
+  -e WCD_BASE_DIR='/workspace:/other-workspace:~/workspace:~/projects' \
   -e WCD_REPO_MARKERS=custom:.git \
+  -e HOME=/fake-home \
   -w /workspace \
   ${DOCKER_USER_ARGS:-} \
   "zshusers/zsh:${ZSH_VERSION}" sleep infinity
@@ -93,8 +110,10 @@ docker run -d --name "wcd-fish" \
   -v "$(pwd)/..:/wcd-repo" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
-  -e WCD_BASE_DIR=/workspace:/other-workspace \
+  -v "$FAKE_HOME_DIR:/fake-home" \
+  -e WCD_BASE_DIR='/workspace:/other-workspace:~/workspace:~/projects' \
   -e WCD_REPO_MARKERS=custom:.git \
+  -e HOME=/fake-home \
   -w /workspace \
   ${DOCKER_USER_ARGS:-} \
   "ohmyfish/fish:${FISH_VERSION}" sleep infinity
@@ -104,8 +123,10 @@ docker run -d --name "wcd-nu" \
   -v "$(pwd)/..:/wcd-repo" \
   -v "$FAKE_WORKSPACE_DIR:/workspace" \
   -v "$FAKE_WORKSPACE_DIR2:/other-workspace" \
-  -e WCD_BASE_DIR=/workspace:/other-workspace \
+  -v "$FAKE_HOME_DIR:/fake-home" \
+  -e WCD_BASE_DIR='/workspace:/other-workspace:~/workspace:~/projects' \
   -e WCD_REPO_MARKERS=custom:.git \
+  -e HOME=/fake-home \
   -w /workspace \
   --entrypoint /bin/sh \
   ${DOCKER_USER_ARGS:-} \

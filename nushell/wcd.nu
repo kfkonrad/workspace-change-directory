@@ -39,7 +39,8 @@ def __wcd_is_repo [dir: string] {
 def __wcd_find_any_repos [] {
   let base_dir = $env.WCD_BASE_DIR? | default $"($nu.home-path)/workspace"
 
-  mut queue = $base_dir | split row ':'
+  # Split base directories and expand tildes
+  mut queue = ($base_dir | split row ':' | each {|dir| $dir | str replace --regex '^~' $nu.home-path })
   mut repos = []
 
   # Breadth first search, skipping subdirectories of git repos
@@ -70,7 +71,8 @@ def __wcd_find_any_repos [] {
 def __wcd_find_repos [repo_name: string, ignore_flag: bool = false] {
     let base_dir = $env.WCD_BASE_DIR? | default $"($nu.home-path)/workspace"
 
-    mut queue = $base_dir | split row ':'
+    # Split base directories and expand tildes
+    mut queue = ($base_dir | split row ':' | each {|dir| $dir | str replace --regex '^~' $nu.home-path })
     mut repos = []
 
     # Breadth first search, skipping subdirectories of git repos

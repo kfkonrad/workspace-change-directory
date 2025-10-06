@@ -20,7 +20,11 @@ function __wcd_find_any_repos
       set ignore yes
     end
 
-    set -l queue (string split ':' "$base_dir")
+    # Split base directories and expand tildes
+    set -l queue
+    for dir in (string split ':' "$base_dir")
+        set -a queue (string replace -r '^~' $HOME $dir)
+    end
     set -l repos
 
     # Breadth first search, skipping subdirectories of git repos

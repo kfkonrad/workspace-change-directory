@@ -49,9 +49,13 @@ __wcd_find_repos() {
     local ignore=$2
     local base_dir=$(test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
 
-    # Initialize a queue with the base directory
+    # Initialize a queue with the base directory and expand tildes
     local -a queue
-    IFS=':' read -r -A queue <<< "$base_dir"
+    local -a base_dirs
+    IFS=':' read -r -A base_dirs <<< "$base_dir"
+    for dir in "${base_dirs[@]}"; do
+        queue+=("${dir/#\~/$HOME}")
+    done
     local -a repos
 
     # Breadth-first search, skipping subdirectories of git repos
@@ -127,8 +131,13 @@ __wcd_find_any_repos() {
     done
 
     local base_dir=$(test -z "$WCD_BASE_DIR" && echo ~/workspace || echo $WCD_BASE_DIR)
+    # Initialize queue and expand tildes
     local -a queue
-    IFS=':' read -r -A queue <<< "$base_dir"
+    local -a base_dirs
+    IFS=':' read -r -A base_dirs <<< "$base_dir"
+    for dir in "${base_dirs[@]}"; do
+        queue+=("${dir/#\~/$HOME}")
+    done
     local -a repos
 
     # Breadth first search, skipping subdirectories of git repos

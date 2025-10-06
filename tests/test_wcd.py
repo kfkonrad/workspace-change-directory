@@ -76,6 +76,14 @@ TEST_CASES = [
     # test flag with non-existent repo still fails
     ("wcd --no-ignore nonexistent", "Repository not found", 1),
     ("wcd -u nonexistent", "Repository not found", 1),
+
+    # test tilde expansion with default ~/workspace
+    ("wcd alpha", "/fake-home/workspace/alpha", 0),
+    ("wcd beta", "/fake-home/workspace/beta", 0),
+
+    # test tilde expansion with custom override ~/projects
+    ("wcd gamma", "/fake-home/projects/gamma", 0),
+    ("wcd delta", "/fake-home/projects/delta", 0),
 ]
 
 def run_in_shell(shell, command):
