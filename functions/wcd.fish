@@ -62,7 +62,7 @@ function __wcd_find_repos
         end
 
         if test -f "$current_dir/.wcdignore" -o -f "$current_dir/$repo_name/.wcdignore"
-            if test $ignore = "yes"
+            if test "$ignore" = "yes"
                 continue # Skip adding subdirectories if an ignore-file is found
             end
         end
