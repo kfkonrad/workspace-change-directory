@@ -75,17 +75,31 @@ def __wcd_find_repos [repo_name: string, ignore_flag: bool = false] {
     mut queue = ($base_dir | split row ':' | each {|dir| $dir | str replace --regex '^~' $nu.home-path })
     mut repos = []
 
+    if ($env.WCD_DEBUG? | default "" | is-not-empty) {
+        print -e $"[DEBUG] Starting search for '($repo_name)' in: ($base_dir)"
+    }
+
     # Breadth first search, skipping subdirectories of git repos
     while ($queue | length) > 0 {
         let current_dir = $queue.0
         $queue = ($queue | skip 1) # Dequeue
 
+        if ($env.WCD_DEBUG? | default "" | is-not-empty) {
+            print -e $"[DEBUG] Visiting:          ($current_dir)"
+        }
+
         if (__wcd_is_repo $current_dir) {
+            if ($env.WCD_DEBUG? | default "" | is-not-empty) {
+                print -e $"[DEBUG] Skipped \(is repo\): ($current_dir)"
+            }
             continue # Skip adding subdirectories if a repo is found
         }
 
         if (not $ignore_flag) and (($current_dir | path join ".wcdignore" | path exists) or
             ($current_dir | path join $repo_name | path join ".wcdignore" | path exists)) {
+            if ($env.WCD_DEBUG? | default "" | is-not-empty) {
+                print -e $"[DEBUG] Skipped \(ignored\): ($current_dir)"
+            }
             continue # Skip adding subdirectories if an ignore-file is found
         }
 
@@ -93,6 +107,9 @@ def __wcd_find_repos [repo_name: string, ignore_flag: bool = false] {
         let subdirs = (ls -l $current_dir | where type == dir | get name)
         for sub_dir in $subdirs {
             if ($sub_dir | path split | last) == $repo_name and (__wcd_is_repo $sub_dir) {
+                if ($env.WCD_DEBUG? | default "" | is-not-empty) {
+                    print -e $"[DEBUG] Found repo:        ($sub_dir)"
+                }
                 $repos = ($repos | append $sub_dir)
             }
         }

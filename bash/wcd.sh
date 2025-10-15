@@ -58,16 +58,22 @@ __wcd_find_repos() {
     done
     local repos=()
 
+    [[ -n "$WCD_DEBUG" ]] && echo "[DEBUG] Starting search for '$repo_name' in: $base_dir" >&2
+
     # Breadth-first search, skipping subdirectories of git repos
     while [[ ${#queue[@]} -gt 0 ]]; do
         local current_dir=${queue[0]}
         queue=("${queue[@]:1}")  # Dequeue
 
+        [[ -n "$WCD_DEBUG" ]] && echo "[DEBUG] Visiting:          $current_dir" >&2
+
         if __wcd_is_repo "$current_dir"; then
+            [[ -n "$WCD_DEBUG" ]] && echo "[DEBUG] Skipped (is repo): $current_dir" >&2
             continue  # Skip adding subdirectories if a repo is found
         fi
 
         if [[ "$ignore" == "yes" ]] && ([[ -f "$current_dir/.wcdignore" ]] || [[ -f "$current_dir/$repo_name/.wcdignore" ]]); then
+            [[ -n "$WCD_DEBUG" ]] && echo "[DEBUG] Skipped (ignored): $current_dir" >&2
             continue  # Skip adding subdirectories if an ignore-file is found
         fi
 
@@ -76,6 +82,7 @@ __wcd_find_repos() {
             if [[ -d "$sub_dir" ]]; then
                 local name=$(basename "$sub_dir")
                 if [[ "$name" == "$repo_name" ]] && __wcd_is_repo "$sub_dir"; then
+                    [[ -n "$WCD_DEBUG" ]] && echo "[DEBUG] Found repo:        $sub_dir" >&2
                     repos+=("$sub_dir")
                 fi
             fi

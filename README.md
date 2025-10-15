@@ -121,6 +121,9 @@ You can configure `wcd` with the following environment variables:
   supported via the `:` separator, e.g. `WCD_BASE_DIR='~/workspace:/mnt/projects'`
 - `WCD_REPO_MARKERS`: Colon-separated list of files or directories that mark a repository. Defaults to `.git`. Examples:
   `.git:.hg:.svn` or `Cargo.toml:package.json:pom.xml`
+- `WCD_DEBUG`: When set to any non-empty value, prints debug information to stderr showing which directories are being
+  visited during the search, which are skipped (and why), and which repositories are found. Useful for troubleshooting
+  or understanding how `wcd` traverses your workspace
 
 ```sh
 wcd <repo-name>
@@ -172,6 +175,24 @@ including those that would normally be ignored.
 
 1. Continuing from the previous example, running `wcd --no-ignore bar` or `wcd -u bar` will bypass the `.wcdignore`
    files and successfully `cd` into `~/workspace/foo/bar/` despite the ignore files being present.
+
+1. To see debug output showing which directories `wcd` visits during its search:
+
+   ```sh
+   WCD_DEBUG=1 wcd foo
+   ```
+
+   This will output (to stderr) something like:
+
+   ```txt
+   [DEBUG] Starting search for 'foo' in: /home/user/workspace
+   [DEBUG] Visiting:          /home/user/workspace
+   [DEBUG] Visiting:          /home/user/workspace/bar
+   [DEBUG] Skipped (is repo): /home/user/workspace/bar
+   [DEBUG] Visiting:          /home/user/workspace/company
+   [DEBUG] Visiting:          /home/user/workspace/company/foo
+   [DEBUG] Found repo:        /home/user/workspace/company/foo
+   ```
 
 ## Testing
 

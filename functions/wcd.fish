@@ -52,17 +52,23 @@ function __wcd_find_repos
     end
     set -l repos
 
+    test -n "$WCD_DEBUG" && echo "[DEBUG] Starting search for '$repo_name' in: $base_dir" >&2
+
     # Breadth first search, skipping subdirectories of git repos
     while set -q queue[1]
         set -l current_dir $queue[1]
         set queue $queue[2..-1] # Dequeue
 
+        test -n "$WCD_DEBUG" && echo "[DEBUG] Visiting:          $current_dir" >&2
+
         if __wcd_is_repo "$current_dir"
+            test -n "$WCD_DEBUG" && echo "[DEBUG] Skipped (is repo): $current_dir" >&2
             continue # Skip adding subdirectories if a repo is found
         end
 
         if test -f "$current_dir/.wcdignore" -o -f "$current_dir/$repo_name/.wcdignore"
             if test "$ignore" = "yes"
+                test -n "$WCD_DEBUG" && echo "[DEBUG] Skipped (ignored): $current_dir" >&2
                 continue # Skip adding subdirectories if an ignore-file is found
             end
         end
@@ -72,6 +78,7 @@ function __wcd_find_repos
             if test -d $sub_dir
                 set name (basename "$sub_dir")
                 if test "$name" = "$repo_name"; and __wcd_is_repo "$sub_dir"
+                    test -n "$WCD_DEBUG" && echo "[DEBUG] Found repo:        $sub_dir" >&2
                     set repos $repos $sub_dir
                 end
             end
