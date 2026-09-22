@@ -61,4 +61,5 @@ end
 
 complete -c wcd -l no-ignore -d "Ignore .wcdignore files"
 complete -c wcd -s u -l no-ignore -d "Ignore .wcdignore files"
+complete -c wcd -s l -l list -d "List matching repos instead of changing directory"
 complete -c wcd -f -a '(__wcd_find_any_repos)'

@@ -129,6 +129,8 @@ You can configure `wcd` with the following environment variables:
 wcd <repo-name>
 wcd --no-ignore <repo-name>
 wcd -u <repo-name>
+wcd --list <repo-name>
+wcd -l <repo-name>
 ```
 
 `wcd` only finds repos if the name fully matches `wcd`'s argument, i.e. passing partial names will not find a match.
@@ -142,6 +144,10 @@ the directory you wish to ignore. This directory and any subdirectories won't be
 
 Use the `--no-ignore` flag (or its short form `-u`) to bypass `.wcdignore` files and search in all directories,
 including those that would normally be ignored.
+
+Use the `--list` flag (or its short form `-l`) to print the absolute paths of all matching repositories, one per
+line, instead of changing into one. This is handy for scripting or for checking which repositories `wcd` would
+offer before navigating. `--list` can be combined with `--no-ignore`.
 
 ### Examples
 
@@ -175,6 +181,15 @@ including those that would normally be ignored.
 
 1. Continuing from the previous example, running `wcd --no-ignore bar` or `wcd -u bar` will bypass the `.wcdignore`
    files and successfully `cd` into `~/workspace/foo/bar/` despite the ignore files being present.
+
+1. Assume again that `~/workspace/a/foo` and `~/workspace/b/foo` are both repos. Running `wcd --list foo` or
+   `wcd -l foo` will print the absolute paths of both matches instead of prompting, and leave the current directory
+   unchanged:
+
+   ```txt
+   /home/kfkonrad/workspace/a/foo
+   /home/kfkonrad/workspace/b/foo
+   ```
 
 1. To see debug output showing which directories `wcd` visits during its search:
 

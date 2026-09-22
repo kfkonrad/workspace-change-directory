@@ -1,11 +1,16 @@
 function wcd
-    set repo_name $argv[1]
+    set -l repo_name
     set -l ignore yes
-    if test "$repo_name" = "--no-ignore" || test "$repo_name" = "-u"
-      set repo_name $argv[2]
-      set ignore no
-    else if test "$argv[2]" = "--no-ignore" || test "$argv[2]" = "-u"
-      set ignore no
+    set -l list no
+    for arg in $argv
+        switch $arg
+            case --no-ignore -u
+                set ignore no
+            case --list -l
+                set list yes
+            case '*'
+                test -z "$repo_name" && set repo_name $arg
+        end
     end
 
     if test -z "$repo_name"
@@ -16,7 +21,11 @@ function wcd
     set repos (string split " " --no-empty -- (__wcd_find_repos $repo_name $ignore))
 
     if set -q repos[1]
-        if set -q repos[2]
+        if test "$list" = yes
+            for repo in $repos
+                echo $repo
+            end
+        else if set -q repos[2]
             __wcd_select_and_cd_repo $repos
         else
             cd $repos[1]

@@ -2,10 +2,10 @@
 
 set -e
 
-BASH_VERSION="5.3.3"
+BASH_VERSION="5.3.20"
 ZSH_VERSION="5.9"
-FISH_VERSION="4.0.2"
-NU_VERSION="0.106.1"
+FISH_VERSION="4.8.1"
+NU_VERSION="0.115.1"
 
 CONTAINERS=("wcd-bash" "wcd-zsh" "wcd-fish" "wcd-nu")
 
@@ -88,6 +88,9 @@ docker run -d --name "wcd-bash" \
   -e WCD_BASE_DIR='/workspace:/other-workspace:~/workspace:~/projects' \
   -e WCD_REPO_MARKERS=custom:.git \
   -e HOME=/fake-home \
+  -e XDG_CONFIG_HOME=/tmp/xdg/config \
+  -e XDG_CACHE_HOME=/tmp/xdg/cache \
+  -e XDG_DATA_HOME=/tmp/xdg/data \
   -w /workspace \
   ${DOCKER_USER_ARGS:-} \
   "bash:${BASH_VERSION}" sleep infinity
@@ -101,6 +104,9 @@ docker run -d --name "wcd-zsh" \
   -e WCD_BASE_DIR='/workspace:/other-workspace:~/workspace:~/projects' \
   -e WCD_REPO_MARKERS=custom:.git \
   -e HOME=/fake-home \
+  -e XDG_CONFIG_HOME=/tmp/xdg/config \
+  -e XDG_CACHE_HOME=/tmp/xdg/cache \
+  -e XDG_DATA_HOME=/tmp/xdg/data \
   -w /workspace \
   ${DOCKER_USER_ARGS:-} \
   "zshusers/zsh:${ZSH_VERSION}" sleep infinity
@@ -114,6 +120,9 @@ docker run -d --name "wcd-fish" \
   -e WCD_BASE_DIR='/workspace:/other-workspace:~/workspace:~/projects' \
   -e WCD_REPO_MARKERS=custom:.git \
   -e HOME=/fake-home \
+  -e XDG_CONFIG_HOME=/tmp/xdg/config \
+  -e XDG_CACHE_HOME=/tmp/xdg/cache \
+  -e XDG_DATA_HOME=/tmp/xdg/data \
   -w /workspace \
   ${DOCKER_USER_ARGS:-} \
   "ohmyfish/fish:${FISH_VERSION}" sleep infinity
@@ -127,6 +136,9 @@ docker run -d --name "wcd-nu" \
   -e WCD_BASE_DIR='/workspace:/other-workspace:~/workspace:~/projects' \
   -e WCD_REPO_MARKERS=custom:.git \
   -e HOME=/fake-home \
+  -e XDG_CONFIG_HOME=/tmp/xdg/config \
+  -e XDG_CACHE_HOME=/tmp/xdg/cache \
+  -e XDG_DATA_HOME=/tmp/xdg/data \
   -w /workspace \
   --entrypoint /bin/sh \
   ${DOCKER_USER_ARGS:-} \

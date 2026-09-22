@@ -1,13 +1,15 @@
 wcd() {
-    local repo_name=$1
+    local repo_name=""
     local ignore="yes"
-
-    if [[ "$repo_name" == "--no-ignore" ]] || [[ "$repo_name" == "-u" ]]; then
-        repo_name=$2
-        ignore="no"
-    elif [[ "$2" == "--no-ignore" ]] || [[ "$2" == "-u" ]]; then
-        ignore="no"
-    fi
+    local list="no"
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+            --no-ignore|-u) ignore="no" ;;
+            --list|-l) list="yes" ;;
+            *) [[ -z "$repo_name" ]] && repo_name="$arg" ;;
+        esac
+    done
 
     if [[ -z "$repo_name" ]]; then
         echo "Please provide a repository name."
@@ -18,7 +20,9 @@ wcd() {
     repos=($(__wcd_find_repos "$repo_name" "$ignore"))
 
     if [[ -n "${repos[1]}" ]]; then
-        if [[ -n "${repos[2]}" ]]; then
+        if [[ "$list" == "yes" ]]; then
+            printf '%s\n' "${repos[@]}"
+        elif [[ -n "${repos[2]}" ]]; then
             __wcd_select_and_cd_repo "${repos[@]}"
         else
             cd "${repos[1]}"
@@ -183,7 +187,7 @@ __wcd_completion() {
 
     # Complete flags
     if [[ "$current_word" == -* ]]; then
-        reply=("--no-ignore" "-u")
+        reply=("--no-ignore" "-u" "--list" "-l")
         return
     fi
 

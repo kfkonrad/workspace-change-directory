@@ -84,6 +84,32 @@ TEST_CASES = [
     # test tilde expansion with custom override ~/projects
     ("wcd gamma", "/fake-home/projects/gamma", 0),
     ("wcd delta", "/fake-home/projects/delta", 0),
+
+    # test --list/-l flag prints absolute paths instead of cd-ing
+    ("wcd --list foo", "/workspace/foo", 0),
+    ("wcd -l corge", "/other-workspace/corge", 0),
+    ("wcd -l grault", "/other-workspace/my-project/grault", 0),
+    # flag may come after the repo name
+    ("wcd corge --list", "/other-workspace/corge", 0),
+    ("wcd corge -l", "/other-workspace/corge", 0),
+    # multiple matches are listed instead of prompting
+    ("wcd -l baz", ["/workspace/baz", "/workspace/company/baz"], 0),
+    ("wcd --list qux", ["/workspace/company/qux", "/other-workspace/qux"], 0),
+    # --list respects .wcdignore unless combined with --no-ignore/-u
+    ("wcd -l xyzzy", "Repository not found", 1),
+    ("wcd -l -u xyzzy", "/other-workspace/xyzzy", 0),
+    ("wcd -u -l waldo", "/other-workspace/garply/waldo", 0),
+    ("wcd --list --no-ignore plugh", "/other-workspace/garply/fred/plugh", 0),
+    ("wcd --no-ignore --list nonexistent", "Repository not found", 1),
+    # --list still requires a repo name
+    ("wcd -l", "Please provide a repository name", 1),
+]
+
+# commands whose output must not change the working directory (/workspace is the container's cwd)
+NO_CD_CASES = [
+    "wcd -l corge",
+    "wcd --list qux",
+    "wcd -u -l waldo",
 ]
 
 def run_in_shell(shell, command):
@@ -142,7 +168,7 @@ def test_wcd(shell, command, expected_output, expected_code):
 
     # Nu will ouput a built-in error message on a missing parameter, so we have to skip this assertion as well for that
     # test case
-    if shell == "nu" and command == "wcd":
+    if shell == "nu" and command in ("wcd", "wcd -l"):
         return
 
     if type(expected_output) == list:
@@ -150,6 +176,17 @@ def test_wcd(shell, command, expected_output, expected_code):
             assert elem in stdout, f"Expected '{elem}' in stdout: {stdout}"
     else:
         assert expected_output in stdout, f"Expected '{expected_output}' in stdout: {stdout}"
+
+@pytest.mark.parametrize("shell", SHELLS)
+@pytest.mark.parametrize("command", NO_CD_CASES)
+def test_list_does_not_cd(shell, command):
+    """--list must print paths without changing the working directory"""
+
+    exit_code, stdout, stderr = run_in_shell(shell, command)
+
+    # the trailing `pwd` in run_in_shell prints the final working directory as the last line
+    last_line = stdout.strip().splitlines()[-1]
+    assert last_line == "/workspace", f"Expected cwd to remain /workspace, got '{last_line}'. Stdout: {stdout}"
 
 def test_container_connectivity():
     """Verify all shell containers are accessible"""

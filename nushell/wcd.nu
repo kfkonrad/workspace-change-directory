@@ -13,11 +13,14 @@ def repositories [] {
 def --env wcd [
     repo_name: string@repositories
     --no-ignore(-u) # Ignore .wcdignore files
+    --list(-l) # List matching repos instead of changing directory
 ] {
     let repos = __wcd_find_repos $repo_name $no_ignore | split row --regex '\s+' | where $it != ""
 
     if ($repos | length) > 0 {
-        if ($repos | length) > 1 {
+        if $list {
+            $repos | str join "\n"
+        } else if ($repos | length) > 1 {
             try { __wcd_select_and_cd_repo $repos }
         } else {
             cd $repos.0
@@ -25,6 +28,11 @@ def --env wcd [
     } else {
         "Repository not found."
     }
+}
+
+# $nu.home-path was renamed to $nu.home-dir in newer Nushell versions; support both
+def __wcd_home [] {
+    $nu.home-dir? | default $nu.home-path?
 }
 
 def __wcd_is_repo [dir: string] {
@@ -37,10 +45,10 @@ def __wcd_is_repo [dir: string] {
 }
 
 def __wcd_find_any_repos [] {
-  let base_dir = $env.WCD_BASE_DIR? | default $"($nu.home-path)/workspace"
+  let base_dir = $env.WCD_BASE_DIR? | default $"(__wcd_home)/workspace"
 
   # Split base directories and expand tildes
-  mut queue = ($base_dir | split row ':' | each {|dir| $dir | str replace --regex '^~' $nu.home-path })
+  mut queue = ($base_dir | split row ':' | each {|dir| $dir | str replace --regex '^~' (__wcd_home) })
   mut repos = []
 
   # Breadth first search, skipping subdirectories of git repos
@@ -69,10 +77,10 @@ def __wcd_find_any_repos [] {
 }
 
 def __wcd_find_repos [repo_name: string, ignore_flag: bool = false] {
-    let base_dir = $env.WCD_BASE_DIR? | default $"($nu.home-path)/workspace"
+    let base_dir = $env.WCD_BASE_DIR? | default $"(__wcd_home)/workspace"
 
     # Split base directories and expand tildes
-    mut queue = ($base_dir | split row ':' | each {|dir| $dir | str replace --regex '^~' $nu.home-path })
+    mut queue = ($base_dir | split row ':' | each {|dir| $dir | str replace --regex '^~' (__wcd_home) })
     mut repos = []
 
     if ($env.WCD_DEBUG? | default "" | is-not-empty) {
